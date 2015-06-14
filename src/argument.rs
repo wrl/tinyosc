@@ -123,3 +123,21 @@ impl<'a> Argument<'a> {
         }
     }
 }
+
+impl<'a> From<i32> for Argument<'a> {
+    fn from(i: i32) -> Argument<'a> {
+        Argument::i(i)
+    }
+}
+
+impl<'a> From<f32> for Argument<'a> {
+    fn from(f: f32) -> Argument<'a> {
+        Argument::f(f)
+    }
+}
+
+impl<'a> From<&'a str> for Argument<'a> {
+    fn from(s: &'a str) -> Argument<'a> {
+        Argument::s(s)
+    }
+}

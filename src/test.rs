@@ -34,7 +34,7 @@ macro_rules! assert_msg_equal {
 fn serialize_no_args() {
     let msg = Message {
         path: "/test_msg",
-        arguments: vec![]
+        arguments: osc_args![]
     };
 
     assert_msg_equal!(msg.serialize(), "/test_msg\0\0\0,\0\0\0");
@@ -44,7 +44,7 @@ fn serialize_no_args() {
 fn serialize_i32() {
     let msg = Message {
         path: "/test_msg",
-        arguments: vec![Argument::i(42)]
+        arguments: osc_args![42]
     };
 
     assert_msg_equal!(msg.serialize(), "/test_msg\0\0\0,i\0\0\0\0\0\x2A");
@@ -54,7 +54,7 @@ fn serialize_i32() {
 fn serialize_f32() {
     let msg = Message {
         path: "/test_msg",
-        arguments: vec![Argument::f(0.0)]
+        arguments: osc_args![0.0 as f32]
     };
 
     assert_msg_equal!(msg.serialize(), "/test_msg\0\0\0,f\0\0\0\0\0\0");
@@ -64,7 +64,7 @@ fn serialize_f32() {
 fn serialize_str() {
     let msg = Message {
         path: "/test_msg",
-        arguments: vec![Argument::s("testing")]
+        arguments: osc_args!["testing"]
     };
 
     assert_msg_equal!(msg.serialize(), "/test_msg\0\0\0,s\0\0testing\0");
@@ -74,7 +74,7 @@ fn serialize_str() {
 fn serialize_kitchen_sink() {
     let msg = Message {
         path: "/test_msg",
-        arguments: vec![Argument::i(42), Argument::f(0.0), Argument::s("testing")]
+        arguments: osc_args![42, (0.0 as f32), "testing"]
     };
 
     assert_msg_equal!(msg.serialize(),

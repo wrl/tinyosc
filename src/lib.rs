@@ -26,4 +26,16 @@ mod argument;
 pub use message::Message;
 pub use argument::Argument;
 
+macro_rules! osc_args {
+    [] => {{
+        vec![]
+    }};
+
+    [$($x:expr),*] => {{
+        let mut v = vec![];
+        $(v.push(Argument::from($x));)*
+        v
+    }};
+}
+
 mod test;
