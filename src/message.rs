@@ -47,6 +47,10 @@ impl<'a> Message<'a> {
             _ => return Err(())
         };
 
+        if typetags.as_bytes()[0] != (',' as u8) {
+            return Err(())
+        }
+
         for typetag in typetags[1 ..].chars() {
             let arg = Argument::deserialize(typetag, &mut slice);
 
