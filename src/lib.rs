@@ -34,7 +34,7 @@ macro_rules! osc_args {
 
     [$($x:expr),*] => {{
         let mut v = vec![];
-        $(v.push(Argument::from($x));)*
+        $(v.push($crate::Argument::from($x));)*
         v
     }};
 }
