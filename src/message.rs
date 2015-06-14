@@ -18,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use std::io::Write;
+use std::io;
+
 use Argument;
 
 pub struct Message<'a> {
@@ -56,10 +59,8 @@ impl<'a> Message<'a> {
         Ok(msg)
     }
 
-    pub fn serialize(&self) -> Vec<u8> {
-        let mut ret: Vec<u8> = vec![];
-
-        ret.extend(Argument::s(self.path).serialize());
+    pub fn serialize_into(&self, into: &mut Write) -> io::Result<()> {
+        try!(Argument::s(self.path).serialize(into));
 
         let mut typetags = String::from(",");
 
@@ -67,12 +68,18 @@ impl<'a> Message<'a> {
             typetags.push(arg.typetag());
         }
 
-        ret.extend(Argument::s(&*typetags).serialize());
+        try!(Argument::s(&*typetags).serialize(into));
 
         for arg in &self.arguments {
-            ret.extend(arg.serialize());
+            try!(arg.serialize(into));
         }
 
-        ret
+        Ok(())
+    }
+
+    pub fn serialize(&self) -> io::Result<Vec<u8>> {
+        let mut ret: Vec<u8> = vec![];
+        self.serialize_into(&mut ret);
+        Ok(ret)
     }
 }

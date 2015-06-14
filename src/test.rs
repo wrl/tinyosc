@@ -26,7 +26,7 @@ use {
 
 macro_rules! assert_msg_equal {
     ($x:expr, $expected:expr) => {
-        assert_eq!($x, $expected.as_bytes());
+        assert_eq!($x.unwrap(), $expected.as_bytes());
     }
 }
 

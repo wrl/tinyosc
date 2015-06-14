@@ -19,8 +19,10 @@
 // SOFTWARE.
 
 use std::str;
+use std::io::Write;
+use std::io;
 
-use byteorder::{ByteOrder,WriteBytesExt,BigEndian};
+use byteorder::{ByteOrder,WriteBytesExt,BigEndian,Error};
 
 #[allow(non_camel_case_types)]
 #[derive(Debug)]
@@ -90,35 +92,34 @@ impl<'a> Argument<'a> {
         }
     }
 
-    pub fn serialize(&self) -> Vec<u8> {
+    pub fn serialize(&self, into: &mut Write) -> io::Result<()> {
         match *self {
-            Argument::i(arg) => {
-                let mut ret = Vec::new();
-                ret.write_i32::<BigEndian>(arg).unwrap();
-                ret
-            }
+            Argument::i(arg) =>
+                match into.write_i32::<BigEndian>(arg) {
+                    Ok(_) => Ok(()),
+                    Err(Error::Io(e)) => Err(e),
+                    Err(_) => Err(io::Error::new(io::ErrorKind::Other, "unknown error"))
+                },
 
-            Argument::f(arg) => {
-                let mut ret = Vec::new();
-                ret.write_f32::<BigEndian>(arg).unwrap();
-                ret
-            }
+            Argument::f(arg) =>
+                match into.write_f32::<BigEndian>(arg) {
+                    Ok(_) => Ok(()),
+                    Err(Error::Io(e)) => Err(e),
+                    Err(_) => Err(io::Error::new(io::ErrorKind::Other, "unknown error"))
+                },
 
             Argument::s(arg) => {
+                try!(into.write_all(arg.as_ref()));
                 let mut ret: Vec<u8> = arg.bytes().collect();
 
-                // add terminating null
-                ret.push(0);
+                let pad = 1 + match (arg.len() + 1) % 4 {
+                    0 => 0,
+                    pad => 4 - pad
+                };
 
-                // pad up to 4 byte boundary
-                match ret.len() % 4 {
-                    0 => {}
-                    pad => for _ in 0..(4 - pad) {
-                        ret.push(0);
-                    }
-                }
+                try!(into.write_all(&[0; 5][.. pad]));
 
-                ret
+                Ok(())
             }
         }
     }
