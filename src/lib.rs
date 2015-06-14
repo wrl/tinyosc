@@ -26,6 +26,7 @@ mod argument;
 pub use message::Message;
 pub use argument::Argument;
 
+#[macro_export]
 macro_rules! osc_args {
     [] => {{
         vec![]
