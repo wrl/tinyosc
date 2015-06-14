@@ -8,4 +8,38 @@
     rust. it is, at the moment, quite bare-bones, but the gist and spirit are
     both there.
 
-    wrl@illest.net
+    currently, only serialization and deserialization of messages is
+    supported. pattern matching is planned.
+
+    tinyosc supports the following type-tags:
+
+        'i' => i32,
+        'f' => f32,
+        's' => &str,
+        'T' => true,
+        'F' => false,
+        'N' => Argument::None
+
+    you can construct argument lists manually, with vec![] like so:
+
+        Message {
+            path: "/where/ever/its/happenin",
+            arguments: vec![Argument::i(42), Argument::f(32.32), Argument::F]
+        }
+
+    or you could use the handy osc_args![] macro, which automatically wraps
+    arguments in their corresponding Argument variant:
+
+        Message {
+            path: "/where/ever/its/happenin",
+            arguments: osc_args![42, 32.32, false]
+        }
+
+    this is identical in effect to the above example with vec![]. the choice
+    is yours!
+
+    simply pair Message serialization/deserialization with std::net::UdpSocket
+    and you are well on yr way!
+
+    questions, comments, and/or ascii art to wrl@illest.net
+    peace
