@@ -1,6 +1,6 @@
 [package]
 name = "tinyosc"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["William Light <wrl@illest.net>"]
 description = "OpenSoundControl implementation"
 license = "MIT"
