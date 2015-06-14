@@ -1,0 +1,11 @@
+   _   _
+  | |_|_|___ _ _ ___ ___ ___
+  |  _| |   | | | . |_ -|  _|
+  |_| |_|_|_|_  |___|___|___|
+            |___|
+
+    tinyosc is a small, liberally licensed opensoundcontrol implementation for
+    rust. it is, at the moment, quite bare-bones, but the gist and spirit are
+    both there.
+
+    wrl@illest.net

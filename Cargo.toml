@@ -1,0 +1,12 @@
+[package]
+name = "tinyosc"
+version = "0.0.1"
+authors = ["William Light <wrl@illest.net>"]
+description = "OpenSoundControl implementation"
+license = "MIT"
+readme = "README"
+keywords = ["audio", "osc", "opensoundcontrol"]
+repository = "https://github.com/wrl/tinyosc"
+
+[dependencies]
+byteorder = "*"
