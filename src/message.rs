@@ -79,7 +79,7 @@ impl<'a> Message<'a> {
 
     pub fn serialize(&self) -> io::Result<Vec<u8>> {
         let mut ret: Vec<u8> = vec![];
-        self.serialize_into(&mut ret);
+        try!(self.serialize_into(&mut ret));
         Ok(ret)
     }
 }

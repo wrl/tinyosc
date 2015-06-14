@@ -41,6 +41,26 @@ fn serialize_no_args() {
 }
 
 #[test]
+fn serialize_bool() {
+    let msg = Message {
+        path: "/test_msg",
+        arguments: osc_args![true, false]
+    };
+
+    assert_msg_equal!(msg.serialize(), "/test_msg\0\0\0,TF\0");
+}
+
+#[test]
+fn serialize_none() {
+    let msg = Message {
+        path: "/test_msg",
+        arguments: osc_args![Argument::None]
+    };
+
+    assert_msg_equal!(msg.serialize(), "/test_msg\0\0\0,N\0\0");
+}
+
+#[test]
 fn serialize_i32() {
     let msg = Message {
         path: "/test_msg",
@@ -74,11 +94,11 @@ fn serialize_str() {
 fn serialize_kitchen_sink() {
     let msg = Message {
         path: "/test_msg",
-        arguments: osc_args![42, (0.0 as f32), "testing"]
+        arguments: osc_args![Argument::None, 42, (0.0 as f32), true, "testing", false]
     };
 
     assert_msg_equal!(msg.serialize(),
-        "/test_msg\0\0\0,ifs\0\0\0\0\0\0\0\x2A\0\0\0\0testing\0");
+        "/test_msg\0\0\0,NifTsF\0\0\0\0\x2A\0\0\0\0testing\0");
 }
 
 #[test]
@@ -88,6 +108,39 @@ fn deserialize_no_args() {
 
     assert_eq!(msg.path, "/test_msg");
     assert!(msg.arguments.len() == 0);
+}
+
+#[test]
+fn deserialize_bool() {
+    let buf = "/test_msg\0\0\0,TF\0".as_bytes();
+    let msg = Message::deserialize(buf).unwrap();
+
+    assert_eq!(msg.path, "/test_msg");
+    assert!(msg.arguments.len() == 2);
+
+    assert!(match msg.arguments[0] {
+        Argument::T => true,
+        _ => false
+    });
+
+    assert!(match msg.arguments[1] {
+        Argument::F => true,
+        _ => false
+    });
+}
+
+#[test]
+fn deserialize_none() {
+    let buf = "/test_msg\0\0\0,N\0\0".as_bytes();
+    let msg = Message::deserialize(buf).unwrap();
+
+    assert_eq!(msg.path, "/test_msg");
+    assert!(msg.arguments.len() == 1);
+
+    assert!(match msg.arguments[0] {
+        Argument::None => true,
+        _ => false
+    });
 }
 
 #[test]
@@ -134,24 +187,38 @@ fn deserialize_string() {
 
 #[test]
 fn deserialize_kitchen_sink() {
-    let buf = "/test_msg\0\0\0,ifs\0\0\0\0\0\0\0\x2A\0\0\0\0testing\0".as_bytes();
+    let buf = "/test_msg\0\0\0,NifTsF\0\0\0\0\x2A\0\0\0\0testing\0".as_bytes();
     let msg = Message::deserialize(buf).unwrap();
 
     assert_eq!(msg.path, "/test_msg");
-    assert!(msg.arguments.len() == 3);
+    assert!(msg.arguments.len() == 6);
 
     assert!(match msg.arguments[0] {
+        Argument::None => true,
+        _ => false
+    });
+    assert!(match msg.arguments[1] {
         Argument::i(v) => (v == 42),
         _ => false
     });
 
-    assert!(match msg.arguments[1] {
+    assert!(match msg.arguments[2] {
         Argument::f(v) => (v == 0.0),
         _ => false
     });
 
-    assert!(match msg.arguments[2] {
+    assert!(match msg.arguments[3] {
+        Argument::T => true,
+        _ => false
+    });
+
+    assert!(match msg.arguments[4] {
         Argument::s(v) => (v == "testing"),
+        _ => false
+    });
+
+    assert!(match msg.arguments[5] {
+        Argument::F => true,
         _ => false
     });
 }

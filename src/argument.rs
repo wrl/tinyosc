@@ -29,7 +29,10 @@ use byteorder::{ByteOrder,WriteBytesExt,BigEndian,Error};
 pub enum Argument<'a> {
     i(i32),
     f(f32),
-    s(&'a str)
+    s(&'a str),
+    T,
+    F,
+    None
 }
 
 fn strchr(haystack: &[u8], needle: u8) -> Option<usize> {
@@ -45,6 +48,10 @@ fn strchr(haystack: &[u8], needle: u8) -> Option<usize> {
 impl<'a> Argument<'a> {
     pub fn deserialize(typetag: char, slice: &mut &'a [u8]) -> Result<Argument<'a>, ()> {
         match typetag {
+            'T' => Ok(Argument::T),
+            'F' => Ok(Argument::F),
+            'N' => Ok(Argument::None),
+
             'i' => {
                 let n = BigEndian::read_i32(*slice);
                 *slice = &slice[4 ..];
@@ -86,6 +93,9 @@ impl<'a> Argument<'a> {
 
     pub fn typetag(&self) -> char {
         match *self {
+            Argument::T => 'T',
+            Argument::F => 'F',
+            Argument::None => 'N',
             Argument::i(_) => 'i',
             Argument::f(_) => 'f',
             Argument::s(_) => 's'
@@ -94,6 +104,8 @@ impl<'a> Argument<'a> {
 
     pub fn serialize(&self, into: &mut Write) -> io::Result<()> {
         match *self {
+            Argument::T | Argument::F | Argument::None => Ok(()),
+
             Argument::i(arg) =>
                 match into.write_i32::<BigEndian>(arg) {
                     Ok(_) => Ok(()),
@@ -110,7 +122,6 @@ impl<'a> Argument<'a> {
 
             Argument::s(arg) => {
                 try!(into.write_all(arg.as_ref()));
-                let mut ret: Vec<u8> = arg.bytes().collect();
 
                 let pad = 1 + match (arg.len() + 1) % 4 {
                     0 => 0,
@@ -121,6 +132,16 @@ impl<'a> Argument<'a> {
 
                 Ok(())
             }
+        }
+    }
+}
+
+impl<'a> From<bool> for Argument<'a> {
+    fn from(b: bool) -> Argument<'a> {
+        if b {
+            Argument::T
+        } else {
+            Argument::F
         }
     }
 }
