@@ -22,7 +22,7 @@ use std::str;
 use std::io::Write;
 use std::io;
 
-use byteorder::{ByteOrder,WriteBytesExt,BigEndian,Error};
+use byteorder::{ByteOrder, WriteBytesExt, BigEndian};
 
 #[allow(non_camel_case_types)]
 #[derive(Debug)]
@@ -106,19 +106,8 @@ impl<'a> Argument<'a> {
         match *self {
             Argument::T | Argument::F | Argument::None => Ok(()),
 
-            Argument::i(arg) =>
-                match into.write_i32::<BigEndian>(arg) {
-                    Ok(_) => Ok(()),
-                    Err(Error::Io(e)) => Err(e),
-                    Err(_) => Err(io::Error::new(io::ErrorKind::Other, "unknown error"))
-                },
-
-            Argument::f(arg) =>
-                match into.write_f32::<BigEndian>(arg) {
-                    Ok(_) => Ok(()),
-                    Err(Error::Io(e)) => Err(e),
-                    Err(_) => Err(io::Error::new(io::ErrorKind::Other, "unknown error"))
-                },
+            Argument::i(arg) => into.write_i32::<BigEndian>(arg),
+            Argument::f(arg) => into.write_f32::<BigEndian>(arg),
 
             Argument::s(arg) => {
                 try!(into.write_all(arg.as_ref()));
