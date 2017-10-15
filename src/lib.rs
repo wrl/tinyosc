@@ -19,12 +19,15 @@
 // SOFTWARE.
 
 extern crate byteorder;
+extern crate regex;
 
 mod message;
 mod argument;
+mod pattern;
 
 pub use message::Message;
 pub use argument::Argument;
+pub use pattern::Pattern;
 
 #[macro_export]
 macro_rules! osc_args {

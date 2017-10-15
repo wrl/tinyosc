@@ -21,7 +21,8 @@
 #[allow(unused_imports)]
 use {
     Argument,
-    Message
+    Message,
+    Pattern
 };
 
 macro_rules! assert_msg_equal {
@@ -221,4 +222,16 @@ fn deserialize_kitchen_sink() {
         Argument::F => true,
         _ => false
     });
+}
+
+#[test]
+fn pattern_match_exact() {
+    let pat = Pattern::new("/hello").unwrap();
+    assert!(pat.matches_path("/hello"));
+}
+
+#[test]
+fn pattern_match_any() {
+    let pat = Pattern::new("/hello*").unwrap();
+    assert!(!pat.matches_path("/test_msg"));
 }
