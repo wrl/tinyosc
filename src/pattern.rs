@@ -38,7 +38,7 @@ impl Pattern {
         let chars = pattern.chars().collect::<Vec<char>>();
         let mut i = 0;
 
-        while i < chars.len() {
+        while i < pattern.len() {
             let c = chars[i];
 
             assert!(c.is_ascii());
@@ -46,7 +46,8 @@ impl Pattern {
             match c {
                 '/' => {
                     let j = i + 1;
-                    if chars[j] == '/' {
+
+                    if j < pattern.len() && chars[j] == '/' {
                         pattern_re.push_str(OSC_ADDR_FULL);
                         pattern_re.push_str("*/");
                         i = j;
