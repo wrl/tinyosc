@@ -101,6 +101,9 @@ impl Pattern {
             i += 1;
         }
 
+        pattern_re.insert(0, '^');
+        pattern_re.push('$');
+
         Ok(
         Pattern {
             pattern_re: Regex::new(pattern_re.as_str()).unwrap()
