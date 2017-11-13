@@ -105,11 +105,12 @@ impl Pattern {
         pattern_re.insert(0, '^');
         pattern_re.push('$');
 
-        Ok(
-        Pattern {
-            pattern_re: Regex::new(pattern_re.as_str()).unwrap()
+        match Regex::new(pattern_re.as_str()) {
+            Ok(re) => Ok(Pattern {
+                pattern_re: re
+            }),
+            Err(_) => Err(())
         }
-        )
     }
 
     pub fn matches(&self, m: Message) -> bool {
