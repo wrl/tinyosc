@@ -21,7 +21,8 @@
 #[allow(unused_imports)]
 use {
     Argument,
-    Message
+    Message,
+    Pattern
 };
 
 macro_rules! assert_msg_equal {
@@ -221,4 +222,115 @@ fn deserialize_kitchen_sink() {
         Argument::F => true,
         _ => false
     });
+}
+
+#[test]
+fn pattern_create() {
+    let pat = Pattern::new("/hello");
+    assert!(pat.is_ok());
+    let pat = Pattern::new("");
+    assert!(!pat.is_ok());
+    let pat = Pattern::new("/hello[something");
+    assert!(!pat.is_ok());
+    let pat = Pattern::new("/hello]");
+    assert!(!pat.is_ok());
+    let pat = Pattern::new("/hello{something");
+    assert!(!pat.is_ok());
+    let pat = Pattern::new("/hello}");
+    assert!(!pat.is_ok());
+}
+
+#[test]
+fn pattern_match_exact() {
+    let pat = Pattern::new("/hello").unwrap();
+    assert!(pat.matches_path("/hello"));
+    assert!(!pat.matches_path("/hello2"));
+    assert!(!pat.matches_path("/test_msg"));
+}
+
+#[test]
+fn pattern_match_asterisk_end() {
+    let pat = Pattern::new("/hello*").unwrap();
+    assert!(pat.matches_path("/hello"));
+    assert!(pat.matches_path("/hello2"));
+    assert!(!pat.matches_path("/test_msg"));
+}
+
+#[test]
+fn pattern_match_asterisk_start() {
+    let pat = Pattern::new("/*world").unwrap();
+    assert!(pat.matches_path("/world"));
+    assert!(pat.matches_path("/helloworld"));
+    assert!(!pat.matches_path("/test_msg"));
+}
+
+#[test]
+fn pattern_match_asterisk_middle() {
+    let pat = Pattern::new("/goodbye*world").unwrap();
+    assert!(pat.matches_path("/goodbyeworld"));
+    assert!(pat.matches_path("/goodbye_cruel_world"));
+    assert!(!pat.matches_path("/test_msg"));
+}
+
+#[test]
+fn pattern_match_question_mark() {
+    let pat = Pattern::new("/hell?").unwrap();
+    assert!(pat.matches_path("/hello"));
+    assert!(!pat.matches_path("/hello_"));
+}
+
+#[test]
+fn pattern_match_curly_braces() {
+    let pat = Pattern::new("/hello/{world,roger}").unwrap();
+    assert!(pat.matches_path("/hello/world"));
+    assert!(pat.matches_path("/hello/roger"));
+    assert!(!pat.matches_path("/hello/sarah"));
+}
+
+#[test]
+fn pattern_match_square_brackets_positive() {
+    let pat = Pattern::new("/hello/[ab]x").unwrap();
+    assert!(pat.matches_path("/hello/ax"));
+    assert!(pat.matches_path("/hello/bx"));
+    assert!(!pat.matches_path("/hello/cx"));
+}
+
+#[test]
+fn pattern_match_square_brackets_negative() {
+    let pat = Pattern::new("/hello/[!ab]x").unwrap();
+    assert!(!pat.matches_path("/hello/ax"));
+    assert!(!pat.matches_path("/hello/bx"));
+    assert!(pat.matches_path("/hello/cx"));
+}
+
+#[test]
+fn pattern_match_square_brackets_set_positive() {
+    let pat = Pattern::new("/hello/[a-f]x").unwrap();
+    assert!(pat.matches_path("/hello/ax"));
+    assert!(pat.matches_path("/hello/bx"));
+    assert!(pat.matches_path("/hello/cx"));
+    assert!(!pat.matches_path("/hello/gx"));
+}
+
+#[test]
+fn pattern_match_square_brackets_set_negative() {
+    let pat = Pattern::new("/hello/[!a-f]x").unwrap();
+    assert!(!pat.matches_path("/hello/ax"));
+    assert!(!pat.matches_path("/hello/bx"));
+    assert!(!pat.matches_path("/hello/cx"));
+    assert!(pat.matches_path("/hello/gx"));
+}
+
+#[test]
+fn pattern_match_double_slash() {
+    let pat = Pattern::new("/hello//world").unwrap();
+    assert!(pat.matches_path("/hello/world"));
+    assert!(pat.matches_path("/hello/brave/new/world"));
+}
+
+#[test]
+fn pattern_match_any() {
+    let pat = Pattern::new("//*").unwrap();
+    assert!(pat.matches_path("/x"));
+    assert!(pat.matches_path("/hello/world"));
 }
