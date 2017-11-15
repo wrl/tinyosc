@@ -10,4 +10,4 @@ repository = "https://github.com/wrl/tinyosc"
 
 [dependencies]
 byteorder = "0.5.1"
-regex = "*"
+regex = "0.2"
