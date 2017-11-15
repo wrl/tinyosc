@@ -70,40 +70,55 @@ impl Pattern {
                     return Err(())
                 }
                 '[' => {
-                    let j = pattern.find(']').unwrap();
+                    let tail = &pattern[i+1..];
 
-                    pattern_re.push_str("[");
-                    let mut sub = &pattern[i+1..j];
+                    match tail.find(']') {
+                        Some(j) => {
+                            pattern_re.push_str("[");
+                            let mut sub = &tail[..j];
 
-                    if sub.starts_with("!") {
-                        sub = &sub[1..];
-                        pattern_re.push_str("^");
-                    }
+                            if sub.starts_with("!") {
+                                sub = &sub[1..];
+                                pattern_re.push_str("^");
+                            }
 
-                    for (ci, c) in sub.char_indices() {
-                        if c == '-' && ci != sub.len() {
-                            pattern_re.push_str("-");
-                        } else {
-                            pattern_re.push_str(regex::escape(c.to_string().as_str()).as_str());
+                            for (ci, c) in sub.char_indices() {
+                                if c == '-' && ci != sub.len() {
+                                    pattern_re.push_str("-");
+                                } else {
+                                    pattern_re.push_str(regex::escape(c.to_string().as_str()).as_str());
+                                }
+                            }
+
+                            pattern_re.push_str("]");
+                            i = i + j + 1; // skip closing bracket too
+                        }
+                        None => {
+                            return Err(()) // closing bracket not found
                         }
                     }
-
-                    pattern_re.push_str("]");
-                    i = j;
                 }
                 '}' => {
                     return Err(())
                 }
                 '{' => {
-                    let j = pattern.find('}').unwrap();
-                    pattern_re.push_str("(");
+                    let tail = &pattern[i+1..];
 
-                    let sub = &pattern[i+1..j];
-                    let s = sub.split(',').collect::<Vec<&str>>().join("|");
-                    pattern_re.push_str(s.as_str());
-                    
-                    pattern_re.push_str(")");
-                    i = j;
+                    match tail.find('}') {
+                        Some(j) => {
+                            pattern_re.push_str("(");
+
+                            let sub = &tail[..j];
+                            let s = sub.split(',').collect::<Vec<&str>>().join("|");
+                            pattern_re.push_str(s.as_str());
+
+                            pattern_re.push_str(")");
+                            i = i + j + 1; // skip closing bracket too
+                        }
+                        None => {
+                            return Err(()) // closing bracket not found
+                        }
+                    }
                 }
                 _ => {
                     pattern_re.push_str(regex::escape(c.to_string().as_str()).as_str());
