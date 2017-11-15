@@ -33,6 +33,10 @@ pub struct Pattern {
 
 impl Pattern {
     pub fn new(pattern: &str) -> Result<Pattern, ()> {
+        if !pattern.starts_with('/') {
+            return Err(())
+        }
+
         let mut pattern_re = String::new();
 
         let chars = pattern.chars().collect::<Vec<char>>();
@@ -62,6 +66,9 @@ impl Pattern {
                     pattern_re.push_str(OSC_ADDR_SYMBOL);
                     pattern_re.push('*');
                 }
+                ']' => {
+                    return Err(())
+                }
                 '[' => {
                     let j = pattern.find(']').unwrap();
 
@@ -83,6 +90,9 @@ impl Pattern {
 
                     pattern_re.push_str("]");
                     i = j;
+                }
+                '}' => {
+                    return Err(())
                 }
                 '{' => {
                     let j = pattern.find('}').unwrap();
